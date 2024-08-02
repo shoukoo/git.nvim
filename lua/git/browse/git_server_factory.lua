@@ -2,6 +2,7 @@ local git = require "git.utils.git"
 local log = require "git.utils.log"
 local Github = require "git.browse.github_server"
 local Gitlab = require "git.browse.gitlab_server"
+local Bitbucket = require "git.browse.bitbucket_server"
 local config = require("git.config")
 
 local GitServerFactory = {}
@@ -54,6 +55,10 @@ function GitServerFactory.get_git_server()
 
   if base_url:find "github" then
     return Github.new(base_url, git_path, git_dir, branch)
+  end
+
+  if base_url:find "bitbucket" then
+    return Bitbucket.new(base_url, git_path, git_dir, branch)
   end
 
   if base_url:find "gitlab" or config.is_private_gitlab(base_url) then

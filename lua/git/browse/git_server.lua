@@ -45,7 +45,12 @@ function GitServer:_open(visual_mode)
       local line_number = tostring(vim.fn.line ".")
       relative_path = relative_path .. "#L" .. line_number
 
-      GitServer._open_url(path.join { self.git_url, self.path, "blob", self.branch, relative_path })
+      if self.git_url:find("bitbucket") then
+        GitServer._open_url(path.join { self.git_url, self.path, "src", self.branch, relative_path })
+      else
+        GitServer._open_url(path.join { self.git_url, self.path, "blob", self.branch, relative_path })
+      end
+
 
       return
     end
@@ -56,13 +61,17 @@ function GitServer:_open(visual_mode)
 
     self:_open_visual_mode(relative_path, start_line, end_line)
   else
-    GitServer._open_url(path.join { self.git_url, self.path, "tree", self.branch })
+    if self.git_url:find("bitbucket") then
+      GitServer._open_url(path.join { self.git_url, self.path, "src", self.branch })
+    else
+      GitServer._open_url(path.join { self.git_url, self.path, "tree", self.branch })
+    end
   end
 end
 
 function GitServer:_get_latest_commit()
   local latest_commit_hash =
-    git.run_git_cmd("git -C " .. self.git_dir .. " rev-parse " .. self.branch .. ' | tr -d "\n"')
+      git.run_git_cmd("git -C " .. self.git_dir .. " rev-parse " .. self.branch .. ' | tr -d "\n"')
   if latest_commit_hash == nil or latest_commit_hash == "" then
     log.error("Failed to get the lastest commit from branch: " .. self.branch)
 
